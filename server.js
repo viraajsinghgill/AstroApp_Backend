@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('✅ Astrology API is running!');
+});
+
 // Import routes
 const kundliRoutes = require('./routes/kundli');
 const chatRoutes = require('./routes/chat');
