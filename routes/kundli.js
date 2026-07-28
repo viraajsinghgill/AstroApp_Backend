@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { generateKundli, generateReport } = require('../utils/astrology');
+const { generateKundli, generateReport, calculateMatchmaking } = require('../utils/astrology');
 
 router.post('/', (req, res) => {
   try {
@@ -24,6 +24,19 @@ router.post('/', (req, res) => {
       error: error.message,
       details: 'Check server logs for full stack trace' 
     });
+  }
+});
+
+router.post('/match', (req, res) => {
+  try {
+    const { person1, person2 } = req.body;
+    if (!person1 || !person2) {
+      return res.status(400).json({ error: 'Please provide birth details for both persons.' });
+    }
+    const result = calculateMatchmaking(person1, person2);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 

@@ -82,4 +82,57 @@ function generateReport(rashi, nakshatra) {
   };
 }
 
+function calculateMatchmaking(birthData1, birthData2) {
+  // Get Nakshatra indexes (simplified but deterministic)
+  const n1 = getNakshatraIndex(birthData1.day, birthData1.month, birthData1.year);
+  const n2 = getNakshatraIndex(birthData2.day, birthData2.month, birthData2.year);
+  
+  // Base score on Nakshatra difference (max 36 points)
+  // In real astrology, this considers Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi
+  // We'll simulate a realistic score between 18 and 36
+  const diff = Math.abs(n1 - n2);
+  const baseScore = 18 + (diff % 18); // Range: 18 to 36
+  
+  // Add some randomness based on Rashi to make it interesting
+  const r1 = getRashiIndex(birthData1.day, birthData1.month);
+  const r2 = getRashiIndex(birthData2.day, birthData2.month);
+  const rashiBonus = (r1 === r2) ? 3 : (Math.abs(r1 - r2) % 3);
+  
+  let finalScore = Math.min(36, baseScore + rashiBonus);
+  
+  // Determine compatibility level
+  let level = 'Average';
+  if (finalScore >= 30) level = 'Excellent';
+  else if (finalScore >= 24) level = 'Good';
+  else if (finalScore >= 18) level = 'Average';
+  else level = 'Needs Work';
+  
+  return {
+    score: finalScore,
+    maxScore: 36,
+    level: level,
+    details: {
+      nakshatra1: getNakshatra(birthData1.day, birthData1.month, birthData1.year),
+      nakshatra2: getNakshatra(birthData2.day, birthData2.month, birthData2.year),
+      rashi1: getRashi(birthData1.day, birthData1.month),
+      rashi2: getRashi(birthData2.day, birthData2.month)
+    }
+  };
+}
+
+// Helper: Get Nakshatra index (0-26)
+function getNakshatraIndex(day, month, year) {
+  return (day * 31 + month * 17 + year * 7) % 27;
+}
+
+// Helper: Get Rashi index (0-11)
+function getRashiIndex(day, month) {
+  const startDays = [14, 14, 15, 15, 15, 16, 17, 17, 16, 16, 15, 14];
+  let index = month - 1;
+  if (day < startDays[month - 1]) {
+    index = (index + 11) % 12;
+  }
+  return index;
+}
+
 module.exports = { generateKundli, generateReport };
