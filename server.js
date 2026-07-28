@@ -1,4 +1,8 @@
 require('dotenv').config();
+// Ensure MONGO_URI is defined
+if (!process.env.MONGO_URI) {
+  console.warn('MONGO_URI not set in environment. Astrologer data will be unavailable.');
+}
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -23,9 +27,12 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/astrologers', astrologerRoutes);
 
 // MongoDB connection (free Atlas)
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err.message);
+    // Don't exit – the app can still serve astrologers from a fallback list
+  });
 
 // Socket.io for chat
 const server = http.createServer(app);
