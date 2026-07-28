@@ -1,25 +1,49 @@
 const { Kundali } = require('nava-astro-sdk');
 
 function generateKundli(birthData) {
-  const kundali = new Kundali({
-    day: birthData.day,
-    month: birthData.month,
-    year: birthData.year,
-    hour: birthData.hour,
-    minute: birthData.minute,
-    latitude: birthData.latitude,
-    longitude: birthData.longitude,
-    timezone: birthData.timezone
-  });
+  try {
+    // Force all values to numbers to avoid type issues
+    const day = parseInt(birthData.day);
+    const month = parseInt(birthData.month);
+    const year = parseInt(birthData.year);
+    const hour = parseInt(birthData.hour) || 12;
+    const minute = parseInt(birthData.minute) || 0;
+    const latitude = parseFloat(birthData.latitude);
+    const longitude = parseFloat(birthData.longitude);
+    const timezone = parseFloat(birthData.timezone);
 
-  return {
-    rashi: kundali.getRashi(),
-    nakshatra: kundali.getNakshatra(),
-    houses: kundali.getHouses(),
-    dashas: kundali.getVimshottariDasha(),
-    planets: kundali.getPlanetaryPositions(),
-    // For matchmaking – we can implement later
-  };
+    // Validate required fields
+    if (!day || !month || !year || isNaN(latitude) || isNaN(longitude) || isNaN(timezone)) {
+      throw new Error(`Invalid birth data: day=${day}, month=${month}, year=${year}, lat=${latitude}, lon=${longitude}, tz=${timezone}`);
+    }
+
+    // nava-astro-sdk uses 'lat', 'lon', 'tz' - not 'latitude', 'longitude', 'timezone'
+    const params = {
+      day: day,
+      month: month,
+      year: year,
+      hour: hour,
+      minute: minute,
+      lat: latitude,
+      lon: longitude,
+      tz: timezone
+    };
+
+    console.log("Generating Kundli with params:", params); // Logs to Render console
+
+    const kundali = new Kundali(params);
+    
+    return {
+      rashi: kundali.getRashi(),
+      nakshatra: kundali.getNakshatra(),
+      houses: kundali.getHouses(),
+      dashas: kundali.getVimshottariDasha(),
+      planets: kundali.getPlanetaryPositions()
+    };
+  } catch (error) {
+    console.error("Kundli generation error:", error);
+    throw new Error(`Astrology calculation failed: ${error.message}`);
+  }
 }
 
 function generateReport(rashi, nakshatra) {
