@@ -14,7 +14,6 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.8.0",
-    "nava-astro-sdk": "^1.0.0-alpha.1",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
